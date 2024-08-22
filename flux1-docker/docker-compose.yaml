@@ -1,0 +1,11 @@
+services:
+  flux1-comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flux1-comfyui-container
+    volumes:
+      - ./cache/models:/app/ComfyUI/models # Persist the models outside the container
+    ports:
+      - "8188:8188"
+    command: ["python3", "main.py"]
