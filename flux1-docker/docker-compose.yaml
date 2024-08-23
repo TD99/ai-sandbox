@@ -3,9 +3,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     container_name: flux1-comfyui-container
     volumes:
       - ./cache/models:/app/ComfyUI/models # Persist the models outside the container
     ports:
       - "8188:8188"
-    command: ["python3", "main.py"]
+    command: ["python3", "main.py", "--listen", "0.0.0.0"]
+    privileged: true
+    user: root
+    networks:
+      - bridge-network
+
+networks:
+  bridge-network:
+    driver: bridge

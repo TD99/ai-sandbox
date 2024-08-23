@@ -2,39 +2,89 @@
 
 # Colors
 ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 RESET='\033[0m'
 
 # Global Variables
 WARNINGS=0
+ERRORS=0
+
+# Argument Booleans (Default values)
+IS_FORCE_ARGUMENT=false
+IS_STRICT_ARGUMENT=false
+IS_CONTINUE_ON_ERROR_ARGUMENT=false
 
 # ------------------------------
 
 # Message Functions
+error() {
+    echo -e "${RED}ERROR| $1${RESET}"
+    ERRORS=$((ERRORS + 1))
+}
+
 warn() {
     echo -e "${ORANGE}WARNING| $1${RESET}"
     WARNINGS=$((WARNINGS + 1))
 }
 
 info() {
-    echo -e "${GREEN}INFO| $1${RESET}"
+    echo -e "${BLUE}INFO| $1${RESET}"
 }
 
-askContinue() {
-    if [ $WARNINGS -gt 0 ]; then
-        echo -e "There are warnings in the system checks. Do you want to continue? (y/n)${RESET}"
-        read -r response
-        if [ "$response" != "y" ]; then
-            echo "Exiting..."
-            exit 1
-        fi
+success() {
+    echo -e "${GREEN}SUCCESS| $1${RESET}"
+}
+
+ask() {
+    echo -e -n "$1"
+    read -r response
+    if [ "$response" == "y" ]; then
+        return 1
     fi
+    return 0
 }
 
-# Check GPU and VRAM
+askContinueWarning() {
+    if [ "$IS_FORCE_ARGUMENT" = true ]; then
+        return 1
+    fi
+    if [ "$IS_STRICT_ARGUMENT" = true ]; then
+        return 0
+    fi
+
+    ask "Do you want to continue? [y/N]: "
+    return $?
+}
+
+showHelp() {
+    echo "Usage: $0 [OPTIONS]"
+    echo "Description: Perform system checks for Flux.1 AI on ComfyUI."
+    echo ""
+    echo "Options:"
+    echo "  -h  | --help                Show this help message and exit."
+    echo "  -f  | --force               Proceed with checks, even if warnings are present."
+    echo "  -s  | --strict              Stop execution if any warnings are detected."
+    echo "  -c  | --continue-on-error   Ignore errors and continue execution."
+    echo ""
+}
+
+# Checks
+## Main Check Function
+do_checks() {
+    echo "Performing system checks for Flux.1 AI on ComfyUI..."
+    check_gpu
+    check_cuda
+    check_cpu
+    check_ram
+    check_storage
+}
+
+## Check GPU and VRAM
 check_gpu() {
     if ! command -v nvidia-smi &> /dev/null; then
-        warn "NVIDIA GPU with CUDA support not detected."
+        error "NVIDIA GPU with CUDA support not detected."
         return
     else
         info "NVIDIA GPU with CUDA support detected."
@@ -48,17 +98,17 @@ check_gpu() {
     fi
 }
 
-# Check CUDA
+## Check CUDA
 check_cuda() {
     if ! command -v nvcc &> /dev/null; then
-        warn "CUDA Toolkit is not installed or not in the PATH."
+        error "CUDA Toolkit is not installed or not in the PATH."
     else
         cuda_version=$(nvcc --version | grep release | awk '{print $6}')
         info "CUDA Toolkit Version: $cuda_version"
     fi
 }
 
-# Check CPU cores/threads
+## Check CPU cores/threads
 check_cpu() {
     cores=$(nproc --all)
     if [ "$cores" -lt 4 ]; then
@@ -68,7 +118,7 @@ check_cpu() {
     fi
 }
 
-# Check RAM
+## Check RAM
 check_ram() {
     ram=$(grep MemTotal /proc/meminfo | awk '{print $2}')
     ram_gb=$((ram / 1024 / 1024))
@@ -79,7 +129,7 @@ check_ram() {
     fi
 }
 
-# Check Storage
+## Check Storage
 check_storage() {
     free_space=$(df / | grep / | awk '{print $4}')
     free_space_gb=$((free_space / 1024 / 1024))
@@ -90,25 +140,56 @@ check_storage() {
     fi
 }
 
-# ------------------------------
+# Argument Parsing
+# Argument Parsing
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        -f|--force)
+            IS_FORCE_ARGUMENT=true
+            ;;
+        -s|--strict)
+            IS_STRICT_ARGUMENT=true
+            ;;
+        -c|--continue-on-error)
+            IS_CONTINUE_ON_ERROR_ARGUMENT=true
+            ;;
+        -h|--help)
+            showHelp
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${RESET}"
+            showHelp
+            exit 1
+            ;;
+    esac
+    shift
+done
 
+# Main Function
 main() {
-    echo "Performing system checks for Flux.1 AI on ComfyUI..."
+    do_checks
 
-    check_gpu
-    check_cuda
-    check_cpu
-    check_ram
-    check_storage
-
-    if [ $WARNINGS -gt 0 ]; then
-        if [ "$1" == "--force" ]; then
-            echo -e "${ORANGE}There are warnings in the system checks. Continuing with --force flag.${RESET}"
+    if [ $ERRORS -gt 0 ]; then
+        if [ "$IS_CONTINUE_ON_ERROR_ARGUMENT" = true ]; then
+            warn "There are errors in the system checks. Continuing..."
         else
-            askContinue
+            error "System checks failed with errors. Exiting..."
+            exit 1
         fi
     fi
-    echo -e "${GREEN}System checks completed successfully.${RESET}"
+
+    if [ $WARNINGS -gt 0 ]; then
+        askContinueWarning
+        if [ $? -eq 1 ]; then
+            warn "There are warnings in the system checks. Continuing..."
+        else
+            error "System checks failed with warnings. Exiting..."
+            exit 1
+        fi
+    fi
+
+    success "All system checks passed successfully."
 }
 
 main $1
