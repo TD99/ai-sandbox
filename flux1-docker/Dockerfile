@@ -2,7 +2,7 @@ FROM nvidia/cuda:12.6.0-runtime-ubuntu24.04
 
 # Install APT dependencies
 RUN apt-get update
-RUN apt-get install git wget gcc python3 python3-pip python3-venv -y 
+RUN apt-get install git wget gcc python3 python3-pip -y 
 
 # Set working directory
 WORKDIR /app
@@ -13,20 +13,15 @@ WORKDIR /app/ComfyUI
 
 # Install Python dependencies
 RUN pip3 install -r requirements.txt --break-system-packages
+RUN pip3 install requests tqdm --break-system-packages
 
-# # Download the flux schnell FP8 checkpoint if not already downloaded
-# RUN mkdir -p ./models/checkpoints && \
-#     [ -f ./models/checkpoints/flux1-schnell-fp8.safetensors ] || \
-#     wget https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors -P ./models/checkpoints/
+# Copy compatibility script
+COPY ./scripts/check_compatibility.sh /app/ComfyUI/check_compatibility.sh
+RUN chmod +x check_compatibility.sh
 
-# # Download the VAE model if not already downloaded
-# RUN mkdir -p ./models/vae && \
-#     [ -f ./models/vae/ae.safetensors ] || \
-#     wget https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors -P ./models/vae/
+# Copy model files
+COPY ./models/config.json /app/ComfyUI/modelConfig.json
+COPY ./models/deploy.py /app/ComfyUI/modelDeploy.py
 
-# # Download the UNet model if not already downloaded
-# RUN mkdir -p ./models/unet && \
-#     [ -f ./models/unet/flux1-schnell.safetensors ] || \
-#     wget https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors -P ./models/unet/
-
-CMD ["venv/bin/python", "./main.py"]
+# Container entrypoint
+CMD "python3 modelDeploy.py"

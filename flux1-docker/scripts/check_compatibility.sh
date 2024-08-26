@@ -101,7 +101,8 @@ check_gpu() {
 ## Check CUDA
 check_cuda() {
     if ! command -v nvcc &> /dev/null; then
-        error "CUDA Toolkit is not installed or not in the PATH."
+        warn "CUDA Toolkit is not installed or not in the PATH."
+        warn "Note: If this is running in a Docker container, it should be fine."
     else
         cuda_version=$(nvcc --version | grep release | awk '{print $6}')
         info "CUDA Toolkit Version: $cuda_version"

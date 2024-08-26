@@ -1,0 +1,29 @@
+[
+    {
+        "name": "ae.safetensors",
+        "displayName": "Flux1 Schnell VAE",
+        "description": "Variational autoencoder model for Flux1 Schnell",
+        "version": "latest",
+        "license": "open-source",
+        "origin": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors",
+        "location": "@/models/vae/"
+    },
+    {
+        "name": "flux1-schnell-fp8.safetensors",
+        "displayName": "Flux1 Schnell Checkpoint",
+        "description": "Flux1 Schnell FP8 low-bit model checkpoint",
+        "version": "latest",
+        "license": "open-source",
+        "origin": "https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors",
+        "location": "@/models/checkpoints/"
+    },
+    {
+        "name": "flux1-schnell.safetensors",
+        "displayName": "Flux1 Schnell UNet",
+        "description": "U-Net model for Flux1 Schnell",
+        "version": "latest",
+        "license": "open-source",
+        "origin": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors",
+        "location": "@/models/unet/"
+    }
+]

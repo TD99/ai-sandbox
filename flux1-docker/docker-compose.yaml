@@ -12,14 +12,20 @@ services:
               capabilities: [gpu]
     container_name: flux1-comfyui-container
     volumes:
-      - ./cache/models:/app/ComfyUI/models # Persist the models outside the container
+      - ./.cache/models:/app/ComfyUI/models # Persist the models outside the container
     ports:
       - "8188:8188"
-    command: ["python3", "main.py", "--listen", "0.0.0.0"]
+    command: "python3 modelDeploy.py"
     privileged: true
     user: root
     networks:
       - bridge-network
+    environment:
+      - OVERRIDE_MODELS=${OVERRIDE_MODELS}
+      - PROJECT_ROOT=${PROJECT_ROOT}
+      - MODEL_CONFIG_PATH=${MODEL_CONFIG_PATH}
+      - BEFORE_DEPLOY_CMD=${BEFORE_DEPLOY_CMD}
+      - AFTER_DEPLOY_CMD=${AFTER_DEPLOY_CMD}
 
 networks:
   bridge-network:
