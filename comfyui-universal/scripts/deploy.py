@@ -88,6 +88,7 @@ async def download_file(url, dest, session, retries=get_timeout_retries()):
                         async for data in response.content.iter_chunked(1024):
                             file.write(data)
                             bar.update(len(data))
+                        bar.close()
             return
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
             attempt += 1
