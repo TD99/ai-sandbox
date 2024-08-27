@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Colors
+PURPLE='\033[0;35m'
 ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -12,6 +13,7 @@ WARNINGS=0
 ERRORS=0
 
 # Argument Booleans (Default values)
+IS_DOCKER_ARGUMENT=false
 IS_FORCE_ARGUMENT=false
 IS_STRICT_ARGUMENT=false
 IS_CONTINUE_ON_ERROR_ARGUMENT=false
@@ -37,6 +39,14 @@ success() {
     echo -e "${GREEN}SUCCESS| $1${RESET}"
 }
 
+note() {
+    echo -e "${PURPLE}${$2}NOTE| $1${RESET}"
+}
+
+noteWithArrow() {
+    echo -e "${PURPLE}  ↳ NOTE| $1${RESET}"
+}
+
 ask() {
     echo -e -n "$1"
     read -r response
@@ -59,11 +69,12 @@ askContinueWarning() {
 }
 
 showHelp() {
-    echo "Usage: $0 [OPTIONS]"
+    echo "Usage: $0 [OPTION(S)]"
     echo "Description: Perform system checks for Flux.1 AI on ComfyUI."
     echo ""
     echo "Options:"
     echo "  -h  | --help                Show this help message and exit."
+    echo "  -d  | --docker              Run the script in Docker mode."
     echo "  -f  | --force               Proceed with checks, even if warnings are present."
     echo "  -s  | --strict              Stop execution if any warnings are detected."
     echo "  -c  | --continue-on-error   Ignore errors and continue execution."
@@ -73,7 +84,7 @@ showHelp() {
 # Checks
 ## Main Check Function
 do_checks() {
-    echo "Performing system checks for Flux.1 AI on ComfyUI..."
+    info "Performing system checks for Flux.1 AI on ComfyUI..."
     check_gpu
     check_cuda
     check_cpu
@@ -98,11 +109,15 @@ check_gpu() {
     fi
 }
 
-## Check CUDA
+## Check CUDA Toolkit
 check_cuda() {
     if ! command -v nvcc &> /dev/null; then
+        if [ "$IS_DOCKER_ARGUMENT" = true ]; then
+            info "Running in Docker mode. CUDA Toolkit is not required."
+            return
+        fi
         warn "CUDA Toolkit is not installed or not in the PATH."
-        warn "Note: If this is running in a Docker container, it should be fine."
+        noteWithArrow "If this is running in a Docker container, CUDA Toolkit should already be available."
     else
         cuda_version=$(nvcc --version | grep release | awk '{print $6}')
         info "CUDA Toolkit Version: $cuda_version"
@@ -113,9 +128,9 @@ check_cuda() {
 check_cpu() {
     cores=$(nproc --all)
     if [ "$cores" -lt 4 ]; then
-        warn "CPU has less than 4 cores. Detected: ${cores} cores"
+        warn "CPU has less than 4 cores/threads. Detected: ${cores} cores/threads"
     else
-        info "CPU Cores: ${cores}"
+        info "CPU Cores/Threads: ${cores}"
     fi
 }
 
@@ -134,7 +149,10 @@ check_ram() {
 check_storage() {
     free_space=$(df / | grep / | awk '{print $4}')
     free_space_gb=$((free_space / 1024 / 1024))
-    if [ "$free_space_gb" -lt 50 ]; then
+    if [ "$free_space_gb" -lt 25 ]; then
+        error "Free disk space is less than 25 GB. Detected: ${free_space_gb} GB"
+        noteWithArrow "This is the absolute minimum required for Flux.1 AI. Please free up some space."
+    elif [ "$free_space_gb" -lt 50 ]; then
         warn "Free disk space is less than 50 GB. Detected: ${free_space_gb} GB"
     else
         info "Free Disk Space: ${free_space_gb} GB"
@@ -142,9 +160,11 @@ check_storage() {
 }
 
 # Argument Parsing
-# Argument Parsing
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
+        -d|--docker)
+            IS_DOCKER_ARGUMENT=true
+            ;;
         -f|--force)
             IS_FORCE_ARGUMENT=true
             ;;

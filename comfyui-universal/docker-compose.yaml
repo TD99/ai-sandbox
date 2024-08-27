@@ -1,0 +1,28 @@
+services:
+  comfyui-universal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    container_name: flux1-container
+    volumes:
+      - ./.models:/app/ComfyUI/models # Store the models outside the container
+    ports:
+      - "8188:8188"
+    command: "python3 ./docker_scripts/deploy.py"
+    privileged: true
+    user: root
+    networks:
+      - bridge-network
+    env_file:
+      - ./config/.env
+
+networks:
+  bridge-network:
+    driver: bridge
