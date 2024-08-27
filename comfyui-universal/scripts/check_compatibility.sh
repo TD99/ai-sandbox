@@ -149,8 +149,8 @@ check_ram() {
 check_storage() {
     free_space=$(df / | grep / | awk '{print $4}')
     free_space_gb=$((free_space / 1024 / 1024))
-    if [ "$free_space_gb" -lt 25 ]; then
-        error "Free disk space is less than 25 GB. Detected: ${free_space_gb} GB"
+    if [ "$free_space_gb" -lt 30 ]; then
+        error "Free disk space is less than 30 GB. Detected: ${free_space_gb} GB"
         noteWithArrow "This is the absolute minimum required for Flux.1 AI. Please free up some space."
     elif [ "$free_space_gb" -lt 50 ]; then
         warn "Free disk space is less than 50 GB. Detected: ${free_space_gb} GB"

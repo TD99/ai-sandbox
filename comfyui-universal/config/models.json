@@ -2,7 +2,7 @@
     {
         "name": "ae.safetensors",
         "displayName": "Flux1 Schnell VAE",
-        "description": "Variational autoencoder model for Flux1 Schnell",
+        "description": "Variational AutoEncoder model for Flux1 Schnell",
         "version": "latest",
         "license": "open-source",
         "origin": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors",
