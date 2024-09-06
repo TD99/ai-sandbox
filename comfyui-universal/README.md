@@ -127,5 +127,3 @@ This folder is made for running ComfyUI easily on Docker, providing an easy conf
 **Codebase and Dependencies**:  
 [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-container-toolkit): A product of NVIDIA Corporation.  
 [Docker](https://github.com/docker): A containerization platform developed by Docker Inc.
-
-# [<button style="border: 0; padding: 0.75rem 1rem; border-radius: 0.5rem;">↑ Go up</button>](#)
