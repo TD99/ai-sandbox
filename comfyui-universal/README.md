@@ -2,8 +2,8 @@
 
 <header style="display: flex; align-items: center; justify-content: center; background: center url('assets/banner.png'); padding: 5rem 0;">
     <div style="background-color: rgba(0,0,0,0.75); border-radius: 0.3rem; padding: 0.5rem 1.25rem;">
-        <h1>ComfyUI Universal</h1>
-        <h4>A dockerized environment for running image generation AI's easily.⚡</h4>
+        <h1 align="center">ComfyUI Universal</h1>
+        <h4 align="center">A dockerized environment for running image generation AI's easily.⚡</h4>
         <p align="center">
             <a href="#description">Description</a> •
             <a href="#requirements">Requirements</a> •
