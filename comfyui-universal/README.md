@@ -21,18 +21,19 @@
 
 ## Description
 
-This folder is made for running ComfyUI easily on Docker, providing an easy configuration that can be adapted for image generation AI's. The default configuration and some parts of this [README](README.md) are based on the `Flux.1-Schnell FP8` model.
+This project is made for running ComfyUI easily on Docker, providing an easy configuration that can be adapted for image generation AI's. The default configuration and some parts of this [README](README.md) are based on the `Flux.1-Schnell FP8` model.
 
 ## Requirements
 
-|                | Required                           | Recommended                        |
-| -------------- | ---------------------------------- | ---------------------------------- |
-| `GPU`          | NVIDIA (with CUDA)                 | NVIDIA (with CUDA)                 |
-| `GPU VRAM`     | 4 GB                               | 8 GB                               |
-| `CPU`          | 4 cores/threads                    | 8 cores/threads                    |
-| `DRAM`         | 16 GB                              | 32 GB                              |
-| `Disk space`   | 30 GB                              | 50 GB                              |
-| `CUDA Toolkit` | Required (not required for Docker) | Required (not required for Docker) |
+|                            | Required                           | Recommended                        |
+| -------------------------- | ---------------------------------- | ---------------------------------- |
+| `GPU`                      | NVIDIA (with CUDA)                 | NVIDIA (with CUDA)                 |
+| `GPU VRAM`                 | 4 GB                               | 8 GB                               |
+| `CPU`                      | 4 cores/threads                    | 8 cores/threads                    |
+| `DRAM`                     | 16 GB                              | 32 GB                              |
+| `Disk space`               | 30 GB                              | 50 GB                              |
+| `CUDA Toolkit`             | Required (not required for Docker) | Required (not required for Docker) |
+| `NVIDIA Container Toolkit` | Required on Linux                  | Required on Linux                  |
 
 ## Pre-installation Steps
 
